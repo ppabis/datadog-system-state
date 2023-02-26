@@ -24,6 +24,11 @@ class SystemState(AgentCheck):
            )
          )
         )
+    
+    def get_days_since_last_reboot(self):
+        out, _, _ = get_subprocess_output(["uptime", "-s"], self.log)
+        boot_time = datetime.strptime(out, "%Y-%m-%d %H:%M:%S")
+        return (datetime.now() - boot_time).days
 
     def check(self, instance):
         pass
