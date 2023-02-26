@@ -3,6 +3,7 @@ from datetime import datetime
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
+__version__ = "0.1.0"
 class SystemState(AgentCheck):
 
     def get_upgradable_packages(self):
@@ -53,5 +54,9 @@ class SystemState(AgentCheck):
         
         return int( version.strip('"').split(".")[0] )
 
+
     def check(self, instance):
-        pass
+        tags = instance.get('tags', [])
+        self.gauge('systemstate.upgradable_packages', self.get_upgradable_packages(), tags=tags)
+        self.gauge('systemstate.days_since_last_reboot', self.get_days_since_last_reboot(), tags=tags)
+        self.gauge('systemstate.os_major_version', self.get_os_major_version(), tags=tags)
