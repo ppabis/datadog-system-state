@@ -10,9 +10,11 @@ class SystemState(AgentCheck):
         # Debian
         if shutil.which("apt") is not None:
             cmd = [ "apt", "-qq", "list", "--upgradable" ]
+        
         # RedHat
         elif shutil.which("dnf") is not None:
             cmd = [ "dnf", "-q", "check-update" ]
+        
         else:
             return -1 # Not supported
         
@@ -33,10 +35,12 @@ class SystemState(AgentCheck):
 
     def get_os_major_version(self):
         version = "-1"
+        
         # Using lsb_release binary if present
         if shutil.which( "lsb_release" ) is not None:
             out, _, _ = get_subprocess_output( [ "lsb_release", "-rs" ], self.log )
             version = out
+        
         # Using /etc/lsb-release file if present
         elif os.path.isfile( "/etc/lsb-release" ):
             with open( "/etc/lsb-release", "r" ) as f:
@@ -44,6 +48,7 @@ class SystemState(AgentCheck):
                     if line.startswith( "DISTRIB_RELEASE=" ):
                         version = line.split("=")[1]
                         break
+        
         # Using /etc/os-release file if present
         elif os.path.isfile( "/etc/os-release" ):
             with open( "/etc/os-release", "r" ) as f:
@@ -58,6 +63,7 @@ class SystemState(AgentCheck):
     def check(self, instance):
         tags = instance.get( 'tags', [] )
         tags.append( f"hostname:{socket.gethostname()}" )
+
         self.gauge( 'systemstate.upgradable_packages', self.get_upgradable_packages(), tags=tags )
         self.gauge( 'systemstate.days_since_last_reboot', self.get_days_since_last_reboot(), tags=tags )
         self.gauge( 'systemstate.os_major_version', self.get_os_major_version(), tags=tags )
