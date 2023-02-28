@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, socket
 from datetime import datetime
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
@@ -57,6 +57,7 @@ class SystemState(AgentCheck):
 
     def check(self, instance):
         tags = instance.get('tags', [])
+        tags.append(f"hostname:{socket.gethostname()}")
         self.gauge('systemstate.upgradable_packages', self.get_upgradable_packages(), tags=tags)
         self.gauge('systemstate.days_since_last_reboot', self.get_days_since_last_reboot(), tags=tags)
         self.gauge('systemstate.os_major_version', self.get_os_major_version(), tags=tags)
