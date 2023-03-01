@@ -18,7 +18,7 @@ class SystemState(AgentCheck):
         else:
             return -1 # Not supported
         
-        out, _, _ = get_subprocess_output( cmd, self.log )
+        out, _, _ = get_subprocess_output( cmd, self.log, raise_on_empty_output=False )
         
         return len( # Count the lines (wc -l)
          list( # Convert to list
@@ -30,7 +30,7 @@ class SystemState(AgentCheck):
     
     def get_days_since_last_reboot(self):
         out, _, _ = get_subprocess_output( [ "uptime", "-s" ], self.log )
-        boot_time = datetime.strptime( out, "%Y-%m-%d %H:%M:%S" )
+        boot_time = datetime.strptime( out.replace("\n", ""), "%Y-%m-%d %H:%M:%S" )
         return ( datetime.now() - boot_time ).days
 
     def get_os_major_version(self):
